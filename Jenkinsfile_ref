@@ -1,0 +1,46 @@
+pipeline{
+    agent any
+    tools{
+        maven'Maven 3.6.3'
+    }
+    stages{
+        stage('check out code')
+        {
+            steps()
+            {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Vinayaklondhe-hash/cicdpipeline.git']]])
+            }
+        }
+        
+        stage('build jar of maven')
+        {
+            steps()
+            {
+                sh 'mvn clean package -f pom.xml'
+            }
+        }
+        stage('build  & tag docker image')
+        {
+            steps()
+            {
+                script{
+                    sh 'docker build -t myimage .'
+                    sh 'docker tag myimage vinayaklondhe96hash/cicd:1'
+                    sh 'docker rmi -f myimage'
+                }
+            }
+        }
+        stage('push image to docker hub')
+        {
+            steps()
+            {
+                script{
+                        sh 'docker login -u vinayaklondhe96hash -p @Job'
+                        sh 'docker push vinayaklondhe96hash/cicd:1'
+                
+                }
+            }
+        }
+    }
+}
+    
